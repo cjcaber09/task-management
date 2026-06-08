@@ -1,0 +1,132 @@
+@import 'tailwindcss';
+
+.error-page {
+  @apply flex flex-col items-center justify-center h-screen text-center;
+}
+
+@layer components {
+  .btn {
+    @apply inline-block px-4 py-2 rounded transition-colors duration-200;
+    background-color: var(--primary-color);
+    color: white;
+    text-align: center;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .dashboard {
+    border-color: var(--border-color);
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+  }
+  .logo {
+    border-bottom: 2px solid var(--border-color);
+  }
+  .btn:hover {
+    background-color: var(--hover-color);
+    text-decoration: none;
+  }
+
+  .card {
+    @apply p-4 rounded shadow;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+  }
+  .input {
+    @apply w-full px-3 py-2 rounded border;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+  }
+  .input:focus {
+    border-color: var(--primary-color);
+    border-width: 1px;
+    outline: none;
+  }
+  .project-dot {
+    @apply w-2 h-2 rounded-full;
+    background-color: var(--primary-color);
+  }
+  .sidebar-link {
+    @apply flex items-center pr-4 pl-4 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 gap-16 text-left;
+  }
+  .sidebar-link:hover {
+    background-color: var(--hover-color);
+    text-decoration: none;
+  }
+  .sidebar-link.active {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  .content {
+    @apply p-4;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+  }
+  .content-header {
+    @apply border-b pb-4;
+    border-color: var(--border-color);
+  }
+
+  .badge-container {
+    @apply border rounded rounded-lg justify-evenly flex items-center px-1 py-1;
+    border-color: var(--border-color);
+  }
+  .prog-type {
+    @apply text-sm text-gray-500 text-center py-1 px-2 rounded min-w-14 cursor-pointer;
+    font-size: var(--text-xs);
+  }
+  .badge-type {
+    @apply text-sm text-gray-500 text-center py-1 px-2 rounded  cursor-pointer;
+  }
+  .badge-type:hover {
+    background-color: var(--hover-color);
+    color: white;
+  }
+  .badge-type.selected {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  .prog-type:hover {
+    background-color: var(--hover-color);
+    color: white;
+  }
+  .prog-type.selected {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  .task-container {
+    @apply p-4 rounded shadow mb-4 cursor-pointer;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+  }
+  .task-container:hover {
+    background-color: var(--border-color);
+    border-color: var(--muted-color);
+  }
+  .project-wrapper {
+    @apply max-h-160 overflow-y-auto
+  }
+
+
+  /* Scroll */
+/* ── Custom Scrollbar ── */
+.project-wrapper::-webkit-scrollbar {
+  width: 6px;
+  margin-left: 2px;
+}
+
+.project-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.project-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 100px;
+}
+
+.project-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.40);
+}
+}

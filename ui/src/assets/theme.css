@@ -1,0 +1,38 @@
+:root {
+  --primary-color: #4f46e5;
+  --secondary-color: #6b7280;
+  --background-color: #f9fafb;
+  --text-color: #111827;
+  --muted-color: #6b7280;
+  --error-color: #ef4444;
+  --success-color: #26e2a3;
+  --border-color: #e5e7eb;
+}
+.dark {
+  --primary-color: #4f46e5;
+  --secondary-color: #6b7280;
+  --hover-color: #3d37af;
+  --background-color: #161e29;
+  --text-color: #f9fafb;
+  --muted-color: #6b7280;
+  --error-color: #ef4444;
+  --success-color: #26e2a3;
+  --border-color: #2b3649;
+}
+
+@layer base {
+  body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: 'Inter', sans-serif;
+  }
+
+  a {
+    color: var(--primary-color);
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+}

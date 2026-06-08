@@ -1,0 +1,15 @@
+# ignore node_modules
+node_modules/
+# ignore build output
+dist/
+# ignore logslogs/
+*.log
+# ignore environment variables.env
+.env
+# ignore IDE specific files
+.vscode/
+.idea/
+# ignore node_modules in shared folders
+shared/node_modules/
+server/node_modules/
+ui/node_modules/
