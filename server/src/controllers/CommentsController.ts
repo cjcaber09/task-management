@@ -34,7 +34,7 @@ export const getCommentsByTaskGuid = async (req: Request, res: Response) => {
     if (!task_guid) {
       return res.status(400).json({ error: "Task ID is required" });
     }
-    const comments = await getCommentsByTask(task_guid);
+    const comments = await getCommentsByTask(task_guid, ["user"]);
     return res.status(200).json(comments);
   } catch (error) {
     console.error("Error fetching comments:", error);

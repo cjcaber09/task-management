@@ -35,6 +35,20 @@ const routes: Route[] = [
     authHandler: authenticateToken, // Replace with your actual authentication handler
     handler: UsersController.getCompany,
   },
+  {
+    method: "get",
+    path: "/search",
+    authentication: true, // Assuming you want to protect this route
+    authHandler: authenticateToken, // Replace with your actual authentication handler
+    handler: UsersController.searchUsers,
+  },
+  {
+    method: "get",
+    path: "/find",
+    authentication: true, // Assuming you want to protect this route
+    authHandler: authenticateToken, // Replace with your actual authentication handler
+    handler: UsersController.findUserByEmail,
+  },
 ];
 
 buildRoutes(router, routes);

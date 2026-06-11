@@ -6,6 +6,7 @@ import { useCompanyStore } from '@/stores/companyStore'
 import { useAuthStore } from '@/stores/authStore'
 import { onMounted } from 'vue'
 import { useProjectStore } from '@/stores/projectStore.ts'
+import { useTaskStore } from '@/stores/taskStore.ts'
 defineOptions({
   name: 'DashboardPage',
 })
@@ -13,6 +14,7 @@ defineOptions({
 const companyStore = useCompanyStore()
 const authStore = useAuthStore()
 const projectStore = useProjectStore()
+const taskStore = useTaskStore()
 onMounted(async () => {
   // fetch Projects
   projectStore.fetchProjects()
@@ -27,11 +29,15 @@ onMounted(async () => {
       await authStore.validateUser()
       const user = authStore.getUser
       if (!user) {
-        console.error('User data is still not available after validation. Cannot fetch company data.')
+        console.error(
+          'User data is still not available after validation. Cannot fetch company data.',
+        )
         return
       }
       companyStore.fetchCompanyByUser(user.guid)
     }
+    // fetch all tasks for the user, this will be filtered by active project in the UI
+    taskStore.fetchAllTasks()
   } catch (error) {
     console.error('Error fetching companies:', error)
   }

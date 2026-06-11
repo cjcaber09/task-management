@@ -7,7 +7,8 @@ export declare const createUserSchema: z.ZodObject<{
         name: z.ZodString;
     }, z.core.$strip>;
     companyInfo: z.ZodOptional<z.ZodObject<{
-        name: z.ZodString;
+        name: z.ZodOptional<z.ZodString>;
+        guid: z.ZodOptional<z.ZodString>;
     }, z.core.$strip>>;
 }, z.core.$strip>;
 export declare const loginUserSchema: z.ZodObject<{

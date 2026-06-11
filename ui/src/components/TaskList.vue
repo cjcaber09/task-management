@@ -8,6 +8,7 @@ import { useTaskStore } from '../stores/taskStore.ts'
 import { useProjectStore } from '../stores/projectStore.ts'
 import router from '@/router'
 import TaskDetails from './TaskDetails.vue'
+import { Trash } from '@lucide/vue'
 // need to filter tasks based on selected status in ProgressStatus component
 const statusStore = useProgressTypeStore()
 const tasksStore = useTaskStore()
@@ -66,13 +67,15 @@ onMounted(() => {
       :height="50"
     >
       <template #content>
-        <div v-if="activeTask">
+        <div v-if="activeTask" class="h-full min-h-0 overflow-hidden">
           <TaskDetails :task="activeTask" />
         </div>
       </template>
-      <!-- <template #footer>
-        <button class="btn" @click="showModal = false">Close</button>
-      </template> -->
+      <template #footer>
+        <button class="btn-outline btn-danger flex items-center">
+          <Trash class="w-4 h-4 mr-2" /> Delete Task
+        </button>
+      </template>
     </Modal>
   </div>
 </template>

@@ -34,12 +34,9 @@ CREATE TABLE IF NOT EXISTS tasks (
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     deleted_at TIMESTAMPTZ DEFAULT NULL
 );
-  DROP INDEX IF EXISTS idx_tasks_project_guid;
-  DROP INDEX IF EXISTS idx_tasks_name;
-  DROP INDEX IF EXISTS idx_project_guid;
-  CREATE INDEX idx_tasks_project_guid ON tasks (project_guid);
-  CREATE INDEX idx_tasks_name ON tasks (name);
-  CREATE INDEX idx_project_guid ON tasks (project_guid);
+  CREATE INDEX IF NOT EXISTS idx_tasks_project_guid ON tasks (project_guid);
+  CREATE INDEX IF NOT EXISTS idx_tasks_name ON tasks (name);
+  CREATE INDEX IF NOT EXISTS idx_project_guid ON tasks (project_guid);
   ${tableTrigger("tasks", "updated_at")}
 `;
 

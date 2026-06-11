@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { useProjectStore } from '@/stores/projectStore'
+import { useCompanyStore } from '@/stores/companyStore'
 import type { ProjectType } from '@shared/types/project'
-import { useTaskStore } from '@/stores/taskStore'
 import { Plus } from '@lucide/vue'
 import AddProjectForm from '@/components/AddProjectForm.vue'
 defineOptions({
@@ -10,12 +10,11 @@ defineOptions({
 })
 
 const projectStore = useProjectStore()
-const taskStore = useTaskStore()
+const companyStore = useCompanyStore()
 const showCreateProjectModal = ref(false)
 
 const setActiveProject = async (project: ProjectType) => {
   projectStore.setActiveProject(project.guid)
-  taskStore.fetchTasksByProject(project.guid)
 }
 const emptyActiveProject = () => {
   projectStore.setActiveProject(null)
@@ -28,8 +27,12 @@ const projects = computed(() => {
 
 <template>
   <div class="sidebar pt-6">
-    <div class="logo flex items-center gap-2 pb-6 px-4">
+    <div class="logo flex gap-2 px-4 pb-6 flex-col">
       <h2 class="sidebar-title">Task Manager</h2>
+      <!-- Company Name -->
+      <span class="sidebar-company-name text-md text-gray-500">{{
+        companyStore.company.name
+      }}</span>
     </div>
     <nav class="sidebar-nav flex flex-col mt-6 px-4">
       <router-link to="/dashboard" class="sidebar-link" @click="emptyActiveProject"
@@ -42,7 +45,7 @@ const projects = computed(() => {
           @click="showCreateProjectModal = !showCreateProjectModal"
         />
       </div>
-      <div class="project-wrapper">
+      <div class="project-wrapper scroll-wrapper">
         <router-link
           v-for="project in projects"
           :key="project.guid"

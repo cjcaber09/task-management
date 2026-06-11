@@ -8,12 +8,11 @@ CREATE TABLE IF NOT EXISTS company_members (
   joined_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  deleted_at TIMESTAMPTZ DEFAULT NULL
+  deleted_at TIMESTAMPTZ DEFAULT NULL,
+  UNIQUE (company_guid, user_guid)
 );
-DROP INDEX IF EXISTS idx_company_members_company_guid;
-DROP INDEX IF EXISTS idx_company_members_user_guid;
-CREATE INDEX idx_company_members_company_guid ON company_members (company_guid);
-CREATE INDEX idx_company_members_user_guid ON company_members (user_guid);
+CREATE INDEX IF NOT EXISTS idx_company_members_company_guid ON company_members (company_guid);
+CREATE INDEX IF NOT EXISTS idx_company_members_user_guid ON company_members (user_guid);
 `;
 
 export default companyMembersSchema;

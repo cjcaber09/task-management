@@ -21,7 +21,24 @@ export const createUserSchema = z
     }),
     companyInfo: z
       .object({
-        name: z.string().min(1, { message: "Company name is required" }),
+        name: z
+          .string()
+          .trim()
+          .min(1, { message: "Company name is required" })
+          .optional(),
+        guid: z
+          .string()
+          .trim()
+          .min(1, { message: "Company guid is required" })
+          .optional(),
+      })
+      .refine((company) => Boolean(company.name) || Boolean(company.guid), {
+        message: "Provide either company name or company guid",
+        path: ["name"],
+      })
+      .refine((company) => !(company.name && company.guid), {
+        message: "Provide only one: company name or company guid",
+        path: ["guid"],
       })
       .optional(),
   })

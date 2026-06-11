@@ -27,8 +27,6 @@ export const registerUser = async ({
   companyInfo,
 }: Omit<RegisterUserInput, "confirmPassword">): Promise<RegisterResponse> => {
   // Registration logic here
-  console.log("Registering user with email: ", email);
-  debugger;
   const user = await pool.query("select * from users where email = $1", [
     email,
   ]);
@@ -44,8 +42,23 @@ export const registerUser = async ({
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
-      const newCompany = await createCompany(companyInfo.name, client);
-      let company_guid = newCompany.guid;
+      let company;
+
+      if (companyInfo.guid) {
+        // use the provided company_guid if it exists, otherwise create a new company and use its guid
+        // find the company by the provided company_guid, if it does not exist, throw an error
+        company = await client.query(
+          "SELECT guid FROM company WHERE guid = $1 AND deleted_at IS NULL",
+          [companyInfo.guid],
+        );
+        if (company.rows.length === 0) {
+          throw new Error("Company with the provided guid does not exist");
+        }
+      } else {
+        company = await createCompany(companyInfo.name, client);
+      }
+      console.log("Company guid to be used for the new user: ", company);
+      let company_guid = company.rows[0].company_guid || company.rows[0].guid; // Depending on whether we created a new company or used an existing one, the guid might be in different places
       newUser = await client.query(
         "insert into users (email, password, name, company_guid) values ($1, $2, $3, $4) returning *",
         [email, password, userInfo.name, company_guid],
@@ -132,7 +145,36 @@ export const userCheck = async (user_guid: string): Promise<Boolean> => {
     throw new Error("Failed to check user");
   }
 };
-
+export const fetchUserByGuidOrEmail = async ({
+  guid,
+  email,
+}: {
+  guid?: string;
+  email?: string;
+}): Promise<Omit<UserType, "password"> | null> => {
+  try {
+    let query = "SELECT * FROM users WHERE deleted_at IS NULL AND ";
+    let params: any[] = [];
+    if (guid) {
+      query += "guid = $1";
+      params.push(guid);
+    } else if (email) {
+      query += "email = $1";
+      params.push(email);
+    } else {
+      throw new Error("Either guid or email must be provided");
+    }
+    const result = await pool.query(query, params);
+    if (result.rows.length === 0) {
+      return null;
+    }
+    const { password: _, ...userWithoutPassword } = result.rows[0];
+    return userWithoutPassword;
+  } catch (error) {
+    console.error("Error fetching user: ", error);
+    throw new Error("Failed to fetch user");
+  }
+};
 export const archiveUser = async (user_guid: string): Promise<void> => {
   try {
     await pool.query("UPDATE users SET deleted_at = NOW() WHERE guid = $1", [
@@ -141,5 +183,28 @@ export const archiveUser = async (user_guid: string): Promise<void> => {
   } catch (error) {
     console.error("Error archiving user: ", error);
     throw new Error("Failed to archive user");
+  }
+};
+
+export const searchUsersByEmail = async ({
+  email,
+  company_guid,
+  exact = false,
+}: Pick<UserType, "email" | "company_guid"> & { exact?: boolean }): Promise<
+  Omit<UserType, "password">[]
+> => {
+  // email is already normalized in the controller, so we can directly use it here
+  try {
+    const query = exact
+      ? "SELECT guid, email, name, company_guid, created_at, updated_at, deleted_at FROM users WHERE lower(email) = $1 AND company_guid=$2 AND deleted_at IS NULL"
+      : "SELECT guid, email, name, company_guid, created_at, updated_at, deleted_at FROM users WHERE email ILIKE $1 AND company_guid=$2 AND deleted_at IS NULL";
+    const result = await pool.query(query, [
+      exact ? email : `%${email}%`,
+      company_guid,
+    ]);
+    return result.rows;
+  } catch (error) {
+    console.error("Error searching users: ", error);
+    throw new Error("Failed to search users");
   }
 };

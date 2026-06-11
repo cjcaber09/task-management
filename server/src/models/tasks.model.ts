@@ -10,36 +10,66 @@ export const getAllTasks = async (
 ): Promise<TaskResponse[]> => {
   try {
     const qb = new QueryBuilder();
-    let result;
-    if (expand.includes("members")) {
-      qb.select("tasks", ["t.*", "JSON_AGG(members.*) AS members"], "t")
-        .leftJoin(
-          "project_members",
-          ["project_members.project_guid = t.project_guid"],
-          false,
-        )
-        .where("t.project_guid = $1", project_guid)
-        .andWhere("t.deleted_at IS NULL", null)
-        .groupBy("t.guid");
-      const { query, params } = qb.build();
-      result = await pool.query(query, [project_guid]);
+    const withMembers = expand.includes("members");
+    const withProject = expand.includes("project");
+    const withCompany = expand.includes("company");
+    const hasProject = project_guid !== "";
+
+    const selectFields = ["t.*"];
+    if (withMembers) {
+      selectFields.push(
+        "COALESCE(JSON_AGG(pm.*) FILTER (WHERE pm.user_guid IS NOT NULL), '[]') AS members",
+      );
     }
-    if (project_guid === "") {
-      const qb = new QueryBuilder();
-      qb.select("tasks", ["t.*"], "t").where("t.deleted_at IS NULL", null);
-      const { query, params } = qb.build();
-      result = await pool.query(query);
-    } else {
-      const qb = new QueryBuilder();
-      qb.select("tasks", ["t.*"], "t")
-        .where("t.project_guid = $1", project_guid)
-        .andWhere("t.deleted_at IS NULL", null);
-      const { query, params } = qb.build();
-      result = await pool.query(query, [project_guid]);
+    if (withProject) {
+      selectFields.push(
+        withMembers
+          ? "(array_agg(row_to_json(p.*)))[1] AS project"
+          : "row_to_json(p.*) AS project",
+      );
     }
+    if (withCompany) {
+      selectFields.push(
+        withMembers
+          ? "(array_agg(row_to_json(c.*)))[1] AS company"
+          : "row_to_json(c.*) AS company",
+      );
+    }
+
+    qb.select("tasks", selectFields, "t");
+
+    if (withMembers) {
+      qb.leftJoin(
+        "project_members pm",
+        ["pm.project_guid = t.project_guid"],
+        false,
+      );
+    }
+    if (withProject) {
+      qb.leftJoin("projects p", ["p.guid = t.project_guid"], false);
+    }
+    if (withCompany) {
+      qb.leftJoin("companies c", ["c.guid = t.company_guid"], false);
+    }
+
+    qb.where("t.deleted_at IS NULL", null).andWhere(
+      "t.status != 'archived'",
+      null,
+    );
+
+    if (hasProject) {
+      qb.andWhere("t.project_guid = $1", project_guid);
+    }
+
+    if (withMembers) {
+      qb.groupBy("t.guid");
+    }
+
+    const { query, params } = qb.build();
+    const result = await pool.query(query, params);
     return result.rows;
   } catch (error) {
-    console.error("Error fetching tasks: ", error);
+    console.error("Error fetching tasks:", error);
     throw new Error("Failed to fetch tasks");
   }
 };

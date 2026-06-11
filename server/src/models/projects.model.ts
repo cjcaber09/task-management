@@ -29,14 +29,17 @@ export const getAllProjects = async (
         JSON_AGG(
             JSON_BUILD_OBJECT(
             'user_guid', project_members.user_guid,
+            'name', u.name,
+            'email', u.email,
             'role', project_members.role,
             'joined_at', project_members.joined_at
             )
         ) FILTER (WHERE project_members.user_guid IS NOT NULL) AS members
         FROM projects
         LEFT JOIN project_members ON project_members.project_guid = projects.guid
+        LEFT JOIN users u ON u.guid = project_members.user_guid
         LEFT JOIN tasks ON tasks.project_guid = projects.guid
-        WHERE projects.deleted_at IS NULL` +
+        WHERE projects.deleted_at IS NULL AND projects.status != 'archived'` +
         (user_guid
           ? ` AND (projects.owner_guid = $1 OR project_members.user_guid = $1)`
           : "") +
@@ -72,31 +75,52 @@ export const createProject = async (
     );
     // include the owner as a member of the project with the role of "owner"
     projectData.members = projectData.members || [];
-    // projectData.members.push({ guid: owner_guid });
-    // check if the owner is already included in the members list, if not add them as a member with the role of "owner"
-    const ownerAlreadyMember = projectData.members.some(
-      (member: MemberType) => member.user_guid === owner_guid,
-    );
-    if (!ownerAlreadyMember) {
-      projectData.members.push({ user_guid: owner_guid, role: "owner" });
-    }
+
     if (projectData.members && projectData.members.length > 0) {
+      // either use guid or email to identify the owner, we can add more complex logic here if needed (e.g., if the owner is identified by email, we need to fetch their guid first before adding them as a member)
+      // check if the owner is already included in the members list, if not add them as a member with the role of "owner"
+      const ownerAlreadyMember = projectData.members.some(
+        (member: MemberType) => member.user_guid === owner_guid,
+      );
+      if (!ownerAlreadyMember) {
+        projectData.members.push({ user_guid: owner_guid, role: "owner" });
+      }
       const memberValues = projectData.members;
-      memberValues.forEach(async (member) => {
-        await createMemberToProject(
-          result.rows[0].guid,
-          member.user_guid,
-          member.role,
-          client,
-        );
-      });
+      await Promise.all(
+        memberValues.map(async (member) => {
+          // validate the member data before adding them to the project,
+          // we need to check if the user_guid exists in the users table and if the role is valid (either "owner" or "member")
+          const exist = await client.query(
+            "SELECT guid FROM users WHERE guid = $1 AND deleted_at IS NULL",
+            [member.user_guid],
+          );
+          if (exist.rows.length === 0) {
+            throw new Error(
+              `User with guid ${member.user_guid} does not exist`,
+            );
+          }
+          await createMemberToProject(
+            result.rows[0].guid,
+            member.user_guid,
+            member.role,
+            client,
+          );
+        }),
+      );
     }
     await client.query("COMMIT");
-    return result.rows[0];
+    // return project details along with the members in the response
+    const project = await getProjectByGuid({
+      guid: result.rows[0].guid,
+      expand: ["members"],
+    });
+    return project;
   } catch (error) {
     await client.query("ROLLBACK");
     console.error("Error creating project: ", error);
     throw new Error("Failed to create project");
+  } finally {
+    client.release();
   }
 };
 
@@ -205,5 +229,30 @@ export const getProjectByGuid = async ({
   } catch (error) {
     console.error("Error fetching project: ", error);
     throw new Error("Failed to fetch project");
+  }
+};
+
+export const archiveProjectByGuid = async ({
+  guid,
+}: Pick<ProjectType, "guid">): Promise<void> => {
+  let client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    // set tasks status to archived for all tasks under the project
+    await client.query(
+      "UPDATE tasks SET status = 'archived', updated_at = NOW() WHERE project_guid = $1 AND deleted_at IS NULL",
+      [guid],
+    );
+    await client.query(
+      "UPDATE projects SET status = 'archived', updated_at = NOW() WHERE guid = $1 AND deleted_at IS NULL",
+      [guid],
+    );
+    await client.query("COMMIT");
+  } catch (error) {
+    console.error("Error archiving project: ", error);
+    await client.query("ROLLBACK");
+    throw new Error("Failed to archive project");
+  } finally {
+    client.release();
   }
 };

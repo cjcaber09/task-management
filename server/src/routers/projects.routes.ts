@@ -20,6 +20,13 @@ const routes: Route[] = [
     authHandler: authenticateToken, // Replace with your actual authentication handler
     handler: ProjectsController.post,
   },
+  {
+    method: "delete",
+    path: "/:guid",
+    authentication: true, // Assuming you want to protect this route
+    authHandler: authenticateToken, // Replace with your actual authentication handler
+    handler: ProjectsController.archiveProject, // Assuming you want to archive the project instead of deleting it permanently
+  },
 ];
 
 buildRoutes(router, routes);

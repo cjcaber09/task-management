@@ -45,6 +45,7 @@ export const useAuthStore = defineStore('auth', () => {
         return null
       }
       const data = await response.json()
+      console.log('Validated user data: ', data)
       setUser(data.user)
       return data.user
     } catch (error) {

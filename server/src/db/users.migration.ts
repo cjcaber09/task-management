@@ -31,10 +31,11 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   deleted_at TIMESTAMPTZ DEFAULT NULL
 );
-  DROP INDEX IF EXISTS idx_users_email;
-  DROP INDEX IF EXISTS idx_users_guid;
-  CREATE INDEX idx_users_email ON users (email);
-  CREATE INDEX idx_users_guid ON users (guid);
+  CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
+  CREATE INDEX IF NOT EXISTS idx_users_guid ON users (guid);
+  CREATE INDEX IF NOT EXISTS idx_users_email_trgm_active
+    ON users USING GIN (email gin_trgm_ops)
+    WHERE deleted_at IS NULL;
   ${tableTrigger("users", "updated_at")}
 `;
 

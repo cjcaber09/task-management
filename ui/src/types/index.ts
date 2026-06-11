@@ -10,6 +10,8 @@ export interface TaskType {
 export interface UserType {
   guid: string
   email: string
+  name: string
+  profileImage?: string
   password: string
   company_guid: string
   created_at: Date

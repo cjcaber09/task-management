@@ -6,10 +6,8 @@ CREATE TABLE IF NOT EXISTS project_members (
   joined_at TIMESTAMPTZ DEFAULT NOW(),
   PRIMARY KEY (project_guid, user_guid)
 );
-DROP INDEX IF EXISTS idx_project_members_project_guid;
-DROP INDEX IF EXISTS idx_project_members_user_guid;
-CREATE INDEX idx_project_members_project_guid ON project_members (project_guid);
-CREATE INDEX idx_project_members_user_guid ON project_members (user_guid);
+CREATE INDEX IF NOT EXISTS idx_project_members_project_guid ON project_members (project_guid);
+CREATE INDEX IF NOT EXISTS idx_project_members_user_guid ON project_members (user_guid);
 `;
 
 export default projectMembersSchema;

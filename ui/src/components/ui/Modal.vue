@@ -58,7 +58,7 @@ const closeModal = () => {
             <h3 class="text-lg font-semibold">{{ data.title ?? '' }}</h3>
           </div>
         </div>
-        <div class="mb-4 flex-1">
+        <div class="mb-4 min-h-0 flex-1 overflow-hidden">
           <slot name="content"></slot>
           <div v-if="!$slots.content"></div>
         </div>

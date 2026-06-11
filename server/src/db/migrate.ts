@@ -18,6 +18,7 @@ import { createEnumType } from "./shared/types";
 import companyMembersSchema from "./company_members.migration";
 import companySchema from "./company.migration";
 import taskAssigneeSchema from "./task_assignee.migration";
+import { ensureUpdateTimestampFunction } from "./shared/triggers";
 
 const migrate = async () => {
   // Run the migration scripts in the correct order
@@ -76,7 +77,10 @@ const migrate = async () => {
   //   Create enum types if they don't exist
   const enumTypes = [
     { name: "status_type", values: ["active", "archived"] },
-    { name: "task_status", values: ["todo", "in_progress", "done"] },
+    {
+      name: "task_status",
+      values: ["todo", "in_progress", "done", "archived"],
+    },
     { name: "task_priority", values: ["low", "medium", "high"] },
   ];
   // create enum types if they don't exist
@@ -90,6 +94,12 @@ const migrate = async () => {
       console.log(`Enum type ${enumType.name} already exists`);
     }
   }
+  // Create extension for uuid generation if it doesn't exist
+  await pool.query("CREATE EXTENSION IF NOT EXISTS pgcrypto");
+  // Enable trigram index support for fast ILIKE '%term%' searches.
+  await pool.query("CREATE EXTENSION IF NOT EXISTS pg_trgm");
+  await pool.query(ensureUpdateTimestampFunction);
+
   try {
     for (const { name, schema } of schemas) {
       await pool.query(schema);

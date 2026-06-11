@@ -26,8 +26,7 @@ CREATE TABLE IF NOT EXISTS company (
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   deleted_at TIMESTAMPTZ DEFAULT NULL
 );
-DROP INDEX IF EXISTS idx_company_guid;
-CREATE INDEX idx_company_guid ON company (guid);
+CREATE INDEX IF NOT EXISTS idx_company_guid ON company (guid);
 ${tableTrigger("company", "updated_at")}
 `;
 

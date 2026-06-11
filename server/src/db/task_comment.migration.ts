@@ -34,10 +34,8 @@ CREATE TABLE IF NOT EXISTS task_comments (
   FOREIGN KEY (task_guid) REFERENCES tasks(guid) ON DELETE CASCADE,
   FOREIGN KEY (user_guid) REFERENCES users(guid) ON DELETE CASCADE
 );
-DROP INDEX IF EXISTS idx_task_comments_task_guid;
-DROP INDEX IF EXISTS idx_task_comments_user_guid;
-CREATE INDEX idx_task_comments_task_guid ON task_comments (task_guid);
-CREATE INDEX idx_task_comments_user_guid ON task_comments (user_guid);
+CREATE INDEX IF NOT EXISTS idx_task_comments_task_guid ON task_comments (task_guid);
+CREATE INDEX IF NOT EXISTS idx_task_comments_user_guid ON task_comments (user_guid);
 
 ${tableTrigger("task_comments", "updated_at")}
 `;

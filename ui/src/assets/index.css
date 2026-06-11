@@ -13,6 +13,47 @@
     font-weight: 600;
     cursor: pointer;
   }
+  .btn-outline {
+    @apply inline-block px-4 py-2 rounded transition-colors duration-200 border;
+    background-color: transparent;
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    text-align: center;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-outline:hover {
+    background-color: var(--primary-color);
+    color: white;
+    text-decoration: none;
+  }
+  .btn-danger {
+    color: var(--error-color);
+    border-color: var(--error-color);
+  }
+  .btn-danger:hover {
+    background-color: var(--error-color);
+  }
+
+  /* Badges */
+  .badge {
+    @apply inline-block px-2 py-1 rounded text-sm;
+    background-color: var(--primary-color);
+    color: white;
+  }
+  .badge:hover {
+    background-color: var(--hover-color);
+    text-decoration: none;
+  }
+
+  .badge-primary {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  .badge-primary:hover {
+    background-color: var(--hover-color);
+  }
+
   .dashboard {
     border-color: var(--border-color);
     border-left: 1px solid var(--border-color);
@@ -106,27 +147,26 @@
     border-color: var(--muted-color);
   }
   .project-wrapper {
-    @apply max-h-160 overflow-y-auto
+    @apply max-h-160 overflow-y-auto;
   }
 
-
   /* Scroll */
-/* ── Custom Scrollbar ── */
-.project-wrapper::-webkit-scrollbar {
-  width: 6px;
-  margin-left: 2px;
-}
+  /* ── Custom Scrollbar ── */
+  .scroll-wrapper::-webkit-scrollbar {
+    width: 6px;
+    margin-left: 2px;
+  }
 
-.project-wrapper::-webkit-scrollbar-track {
-  background: transparent;
-}
+  .scroll-wrapper::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
-.project-wrapper::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 100px;
-}
+  .scroll-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 100px;
+  }
 
-.project-wrapper::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.40);
-}
+  .scroll-wrapper::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+  }
 }

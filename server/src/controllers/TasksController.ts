@@ -15,7 +15,7 @@ const get = async (req: Request, res: Response): Promise<void> => {
   }
   const company_guid = req.user.company_guid;
   try {
-    const tasks = await getAllTasks("", [], company_guid);
+    const tasks = await getAllTasks("", ["members", "project"], company_guid);
     res.json({ tasks });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch tasks" });

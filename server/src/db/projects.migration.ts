@@ -31,8 +31,7 @@ CREATE TABLE IF NOT EXISTS projects (
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   deleted_at TIMESTAMPTZ DEFAULT NULL
 );
-  DROP INDEX IF EXISTS idx_projects_owner_guid;
-  CREATE INDEX idx_projects_owner_guid ON projects (owner_guid);
+  CREATE INDEX IF NOT EXISTS idx_projects_owner_guid ON projects (owner_guid);
   ${tableTrigger("projects", "updated_at")}
 `;
 

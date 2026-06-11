@@ -1,9 +1,13 @@
 <script lang="ts" setup>
 import { Bell } from '@lucide/vue'
-
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '@/stores/authStore'
+import ProfileAvatar from './ui/ProfileAvatar.vue'
 defineOptions({
   name: 'ContentHeader',
 })
+const authStore = useAuthStore()
+const { user } = storeToRefs(authStore)
 </script>
 <template>
   <div class="content-header flex items-center justify-between">
@@ -13,9 +17,8 @@ defineOptions({
       <span
         class="notification-badge absolute top-0 right-10 w-2 h-2 bg-red-500 rounded-full"
       ></span>
-      <!-- add profile -->
       <div class="profile ml-4">
-        <img alt="Profile" class="w-6 h-6 rounded-full border-2 border-gray-300" />
+        <ProfileAvatar :user="user" />
       </div>
     </div>
   </div>

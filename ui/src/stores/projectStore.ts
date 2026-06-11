@@ -5,6 +5,7 @@ import { useAuthStore } from './authStore'
 import router from '@/router'
 import type { AddProjectType } from '@/types/projects'
 import { useTaskStore } from './taskStore'
+import type { UserType } from '@shared/types/user'
 export const useProjectStore = defineStore('project', () => {
   const projects = ref<ProjectType[]>([])
   const activeProject = ref<ProjectType | null>(null)
@@ -66,12 +67,56 @@ export const useProjectStore = defineStore('project', () => {
     }
     return activeProject.value?.guid
   })
-  function setActiveProject(guid: string | null) {
+  const setActiveProject = (guid: string | null) => {
     if (guid === null) activeProject.value = null
     const project = projects.value.find((p) => p.guid === guid) || null
     activeProject.value = project
   }
 
+  const searchUsersByEmail = async (email: UserType['email']) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URI_DEV}/users/search?email=${encodeURIComponent(email)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${useAuthStore().getToken()}`,
+          },
+        },
+      )
+      if (!response.ok) {
+        console.error('Failed to search users by email')
+        return []
+      }
+      const data = await response.json()
+      return data.users
+    } catch (error) {
+      console.error('Error searching users by email:', error)
+      return []
+    }
+  }
+
+  const archiveProject = async (guid: ProjectType['guid']) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URI_DEV}/projects/${guid}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${useAuthStore().getToken()}`,
+        },
+      })
+      if (!response.ok) {
+        console.error('Failed to archive project')
+        return
+      }
+      // Remove the archived project from the projects list
+      projects.value = projects.value.filter((project) => project.guid !== guid)
+      // If the archived project is the active project, reset activeProject to null
+      if (activeProject.value?.guid === guid) {
+        activeProject.value = null
+      }
+    } catch (error) {
+      console.error('Error archiving project:', error)
+    }
+  }
   // watch projects if null set tasks to fetch all tasks, otherwise fetch tasks for the active project
   watch(activeProject, () => {
     if (!activeProject.value) {
@@ -84,6 +129,7 @@ export const useProjectStore = defineStore('project', () => {
       taskStore.fetchTasksByProject(activeProject.value.guid)
     }
   })
+
   return {
     projects,
     activeProject,
@@ -92,5 +138,7 @@ export const useProjectStore = defineStore('project', () => {
     addProject,
     getActiveProjectGuid,
     setActiveProject,
+    searchUsersByEmail,
+    archiveProject,
   }
 })

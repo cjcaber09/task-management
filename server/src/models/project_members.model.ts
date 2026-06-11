@@ -25,13 +25,13 @@ export const createMemberToProject = async (
   role: string = "member",
   client: any = null,
 ): Promise<void> => {
+  let connection = null;
+  if (client) {
+    connection = client;
+  } else {
+    connection = pool;
+  }
   try {
-    let connection = null;
-    if (client) {
-      connection = client;
-    } else {
-      connection = pool;
-    }
     const result = await connection.query(
       "INSERT INTO project_members (project_guid, user_guid, role) VALUES ($1, $2, $3)",
       [project_guid, user_guid, role],
@@ -40,5 +40,9 @@ export const createMemberToProject = async (
   } catch (error) {
     console.error("Error adding member to project: ", error);
     throw new Error("Failed to add member to project");
+  } finally {
+    if (!client && connection) {
+      connection.release();
+    }
   }
 };

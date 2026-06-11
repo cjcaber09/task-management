@@ -16,4 +16,6 @@ export type ProjectType = {
 }
 
 export type AddProjectType = Pick<CompanyType, 'name' | 'status'> &
-  Partial<Pick<CompanyType, 'description' | 'company_guid'>>
+  Partial<Pick<CompanyType, 'description' | 'company_guid'>> & {
+    members?: Pick<MemberType, 'email'>[]
+  }

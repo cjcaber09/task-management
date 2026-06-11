@@ -22,7 +22,24 @@ exports.createUserSchema = zod_1.z
     }),
     companyInfo: zod_1.z
         .object({
-        name: zod_1.z.string().min(1, { message: "Company name is required" }),
+        name: zod_1.z
+            .string()
+            .trim()
+            .min(1, { message: "Company name is required" })
+            .optional(),
+        guid: zod_1.z
+            .string()
+            .trim()
+            .min(1, { message: "Company guid is required" })
+            .optional(),
+    })
+        .refine((company) => Boolean(company.name) || Boolean(company.guid), {
+        message: "Provide either company name or company guid",
+        path: ["name"],
+    })
+        .refine((company) => !(company.name && company.guid), {
+        message: "Provide only one: company name or company guid",
+        path: ["guid"],
     })
         .optional(),
 })
