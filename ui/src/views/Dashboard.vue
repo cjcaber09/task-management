@@ -46,11 +46,11 @@ onMounted(async () => {
 <template>
   <div class="dashboard flex h-screen mx-auto lg:mx-12 2xl:mx-24">
     <SidebarComponent />
-    <div class="main-content flex-1 flex flex-row gap-6">
+    <div class="main-content flex-1 flex flex-row gap-4">
       <div class="content flex-1 min-w-[300px]">
         <ContentComponent />
       </div>
-      <div>
+      <div class="overview w-[300px] hidden lg:block">
         <OverviewComponent />
       </div>
     </div>

@@ -169,4 +169,33 @@
   .scroll-wrapper::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.4);
   }
+
+  .select {
+    @apply w-full px-3 py-2 rounded border;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+
+    /* remove arrow */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cpath fill='%23FFFFFF' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 36px;
+  }
+  .select:focus {
+    border-color: var(--primary-color);
+    border-width: 1px;
+    outline: none;
+  }
+
+  .overview-item {
+    @apply p-4 rounded-lg shadow flex-1 min-w-[120px];
+    background-color: var(--background-color);
+    border: 1px solid var(--primary-color);
+  }
 }

@@ -24,19 +24,14 @@ export const createMemberToProject = async (
   user_guid: string,
   role: string = "member",
   client: any = null,
-): Promise<void> => {
-  let connection = null;
-  if (client) {
-    connection = client;
-  } else {
-    connection = pool;
-  }
+): Promise<boolean> => {
+  const connection = client || (await pool.connect());
   try {
     const result = await connection.query(
-      "INSERT INTO project_members (project_guid, user_guid, role) VALUES ($1, $2, $3)",
+      "INSERT INTO project_members (project_guid, user_guid, role) VALUES ($1, $2, $3) RETURNING project_guid",
       [project_guid, user_guid, role],
     );
-    return result.rows[0];
+    return result.rowCount > 0;
   } catch (error) {
     console.error("Error adding member to project: ", error);
     throw new Error("Failed to add member to project");

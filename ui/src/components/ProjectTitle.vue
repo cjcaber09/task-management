@@ -8,6 +8,8 @@ import type { ProjectType } from '@shared/types/project'
 import IconButton from './ui/IconButton.vue'
 import DropdownMenu from './ui/DropdownMenu.vue'
 import ProfileAvatar from './ui/ProfileAvatar.vue'
+import { useModalStore } from '@/stores/modalStore'
+import AddMemberContent from './AddProjectMember.vue'
 defineOptions({
   name: 'ProjectTitle',
 })
@@ -44,6 +46,15 @@ const archiveProject = () => {
       console.error('Error archiving project: ', error)
     })
 }
+
+const modalStore = useModalStore()
+
+const AddMember = () => {
+  // open Modal
+  modalStore.openModal(AddMemberContent, {
+    settings: { width: 30, noCloseButton: false, footer: false },
+  })
+}
 </script>
 
 <template>
@@ -54,6 +65,13 @@ const archiveProject = () => {
       <div class="members-list flex flex-row mt-2">
         <div v-for="member in activeProject?.members || []" :key="member.guid" class="flex">
           <ProfileAvatar :user="member" />
+        </div>
+        <div
+          class="add-member p-1 ml-1 justify-center flex rounded rounded-full items-center border-2 border-gray-300 cursor-pointer"
+          v-if="activeProject"
+          @click="AddMember"
+        >
+          <Plus class="w-3 h-3 cursor-pointer" />
         </div>
       </div>
     </div>

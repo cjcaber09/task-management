@@ -5,7 +5,7 @@ defineOptions({
 })
 defineProps<{
   commentItem: {
-    user: UserType
+    user: UserType | null
     comment: string
     updated_at: string
   }
@@ -15,7 +15,7 @@ defineProps<{
 <template>
   <!-- view comment -->
   <div class="comment-item">
-    <span class="text-xs text-gray-500">{{ commentItem.user.name }}</span>
+    <span class="text-xs text-gray-500">{{ commentItem.user?.name ?? 'Unknown User' }}</span>
     <p class="text-sm my-2">{{ commentItem.comment }}</p>
     <span class="text-xs text-gray-500">{{
       new Date(commentItem.updated_at).toLocaleString()

@@ -117,6 +117,55 @@ export const useProjectStore = defineStore('project', () => {
       console.error('Error archiving project:', error)
     }
   }
+
+  const isUserAMemberOfActiveProject = (payload: { email: string }) => {
+    const authStore = useAuthStore()
+    const userEmail = payload.email
+    console.log('Checking if user is a member of the active project:', {
+      userEmail,
+      activeProject: activeProject.value,
+    })
+    if (!activeProject.value || !userEmail) {
+      return false
+    }
+    if (!activeProject.value.members || activeProject.value.members.length === 0) {
+      console.log('Active project has no members')
+      return false
+    }
+
+    return activeProject.value.members.some((member) => member.email === userEmail) || false
+  }
+
+  const addMembersToProject = async (projectGuid: string, userEmails: { email: string }[]) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URI_DEV}/projects/${projectGuid}/members`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${useAuthStore().getToken()}`,
+          },
+          body: JSON.stringify({ members: userEmails }),
+        },
+      )
+      if (!response.ok) {
+        console.error('Failed to add members to project')
+        return
+      }
+      const newMembers = await response.json()
+      // Update the members list of the active project
+      if (activeProject.value && activeProject.value.guid === projectGuid) {
+        if (!activeProject.value.members) {
+          activeProject.value.members = []
+        }
+        activeProject.value.members.push(...newMembers.members)
+      }
+      fetchProjects() // Refresh the projects list to reflect the updated members
+    } catch (error) {
+      console.error('Error adding members to project:', error)
+    }
+  }
   // watch projects if null set tasks to fetch all tasks, otherwise fetch tasks for the active project
   watch(activeProject, () => {
     if (!activeProject.value) {
@@ -140,5 +189,7 @@ export const useProjectStore = defineStore('project', () => {
     setActiveProject,
     searchUsersByEmail,
     archiveProject,
+    isUserAMemberOfActiveProject,
+    addMembersToProject,
   }
 })

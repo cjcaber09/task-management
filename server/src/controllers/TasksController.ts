@@ -4,7 +4,12 @@ import type {
   TaskResponse,
   taskType,
 } from "../types/tasks.types";
-import { getAllTasks, createTask, getTaskByGuid } from "../models/tasks.model";
+import {
+  getAllTasks,
+  createTask,
+  getTaskByGuid,
+  updateTaskInfo,
+} from "../models/tasks.model";
 import { getProjectByGuid } from "../models/projects.model";
 // import { ProjectResponse, ProjectType } from "../types/shared.types";
 
@@ -143,7 +148,11 @@ export const getTasksByProject = async (
       return;
     }
     // get all tasks logic here
-    const tasks = await getAllTasks(project_guid, [], project.company_guid);
+    const tasks = await getAllTasks(
+      project_guid,
+      ["project", "members"],
+      project.company_guid,
+    );
     res.json({ tasks });
     return;
   } catch (error) {
@@ -154,8 +163,23 @@ export const getTasksByProject = async (
     return;
   }
 };
+
+const updateTask = async (
+  req: Request<{ task_guid: string }, {}, Partial<taskType>>,
+  res: Response<TaskResponse>,
+): Promise<void> => {
+  const { task_guid } = req.params;
+  const updateData = req.body;
+  const user = req.user?.guid;
+  // validate user authentication and task ownership logic here
+
+  // check if the task exists and is active, if not return an error
+  const task = await updateTaskInfo({ guid: task_guid }, { updateData });
+  res.json(task);
+};
 export default {
   get,
   post,
   getTasksByProject,
+  updateTask,
 };

@@ -9,7 +9,12 @@ defineOptions({
   name: 'AddTaskForm',
 })
 
-const tasks = ref<Omit<TaskType, 'guid'>>({
+type CreateTaskPayload = Pick<
+  TaskType,
+  'name' | 'description' | 'status' | 'priority' | 'project_guid'
+>
+
+const tasks = ref<CreateTaskPayload>({
   name: '',
   description: '',
   status: 'todo',
@@ -26,9 +31,16 @@ const addTask = () => {
     console.error('No active project selected. Cannot fetch tasks.')
     return
   }
-
+  if (!tasks.value.name) {
+    console.error('Task name is required.')
+    return
+  }
+  const payload: CreateTaskPayload = {
+    ...tasks.value,
+    project_guid: activeProjectGuid,
+  }
   taskStore
-    .addTask({ ...tasks.value, project_guid: activeProjectGuid })
+    .addTask(payload)
     .then(() => {
       // reset the form after successful task creation
       tasks.value = {

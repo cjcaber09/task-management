@@ -1,14 +1,18 @@
 <script lang="ts" setup>
+import { Edit } from '@lucide/vue'
 import Input from './Input.vue'
+import { ref } from 'vue'
 defineOptions({
   name: 'AddAssignee',
 })
 defineProps<{
   modelValue: string
-  assignees: {
+  assignees?: {
     email: string
   }[]
-  error: string
+  error?: string
+  label?: string
+  singleAssigned?: string
 }>()
 const emit = defineEmits<{
   'update:modelValue': [value: string]
@@ -16,30 +20,20 @@ const emit = defineEmits<{
   add: []
   remove: [index: number]
 }>()
+const editMode = ref(false)
 </script>
 <template>
   <div class="flex flex-col gap-2">
-    <span class="text-xs text-gray-500">Assignees</span>
+    <span v-if="label" class="text-xs text-gray-500">{{ label }}</span>
     <Input
       type="text"
       placeholder="Enter email and press Enter"
       :modelValue="modelValue"
       @update:modelValue="(emit('update:modelValue', $event), emit('input-change', $event))"
       @input-enter="emit('add')"
+      v-if="!singleAssigned || (singleAssigned && editMode === true)"
     />
-    <!-- add menu for suggested users will go here
-    <div class="flex flex-col gap-1">
-      <span class="text-xs text-gray-500">Suggested Users</span>
-      <div
-        v-for="(user, index) in assignees"
-        :key="index"
-        class="p-2 border rounded cursor-pointer hover:bg-gray-100"
-        @click="emit('add')"
-      >
-        {{ user.email }}
-      </div>
-    </div> -->
-    <div class="flex flex-row flex-wrap gap-2">
+    <div class="flex flex-row flex-wrap gap-2" v-if="assignees && assignees.length > 0">
       <div
         v-for="(assignee, index) in assignees"
         :key="index"
@@ -48,6 +42,14 @@ const emit = defineEmits<{
         {{ assignee.email }}
         <span @click.prevent="emit('remove', index)" class="ml-1 text-xs">X</span>
       </div>
+    </div>
+    <div
+      v-else-if="singleAssigned"
+      class="badge badge-primary flex items-center gap-2 w-fit"
+      @click="editMode = !editMode"
+    >
+      {{ singleAssigned }}
+      <Edit class="w-3 h-3 ml-1 cursor-pointer" />
     </div>
     <span class="text-red-500 text-sm mt-1" v-if="error">{{ error }}</span>
   </div>

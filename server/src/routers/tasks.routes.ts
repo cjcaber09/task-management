@@ -27,6 +27,13 @@ const routes: Route[] = [
     authHandler: authenticateToken,
     handler: TasksController.getTasksByProject,
   },
+  {
+    method: "put",
+    path: "/:task_guid",
+    authentication: true,
+    authHandler: authenticateToken,
+    handler: TasksController.updateTask,
+  },
 ];
 
 buildRoutes(router, routes);

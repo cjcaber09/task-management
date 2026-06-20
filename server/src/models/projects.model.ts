@@ -75,8 +75,11 @@ export const createProject = async (
     );
     // include the owner as a member of the project with the role of "owner"
     projectData.members = projectData.members || [];
-
-    if (projectData.members && projectData.members.length > 0) {
+    if (projectData.members.length === 0) {
+      // add current User as a member with role "owner" if not already included in the members list
+      projectData.members.push({ user_guid: owner_guid, role: "owner" });
+    }
+    if (projectData.members.length > 0) {
       // either use guid or email to identify the owner, we can add more complex logic here if needed (e.g., if the owner is identified by email, we need to fetch their guid first before adding them as a member)
       // check if the owner is already included in the members list, if not add them as a member with the role of "owner"
       const ownerAlreadyMember = projectData.members.some(
@@ -252,6 +255,60 @@ export const archiveProjectByGuid = async ({
     console.error("Error archiving project: ", error);
     await client.query("ROLLBACK");
     throw new Error("Failed to archive project");
+  } finally {
+    client.release();
+  }
+};
+
+export const addMembersToProjectByGuid = async ({
+  guid,
+  members,
+}: {
+  guid: ProjectType["guid"];
+  members: { email: string }[];
+}): Promise<MemberType[]> => {
+  let client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    // fetch the project to get the company_guid and validate the project exists and is not archived or deleted
+    const projectResult = await client.query(
+      "SELECT * FROM projects WHERE guid = $1 AND deleted_at IS NULL AND status != 'archived' LIMIT 1",
+      [guid],
+    );
+    if (projectResult.rows.length === 0) {
+      throw new Error("Project not found or is not active");
+    }
+    const project = projectResult.rows[0];
+    const company_guid = project.company_guid;
+    // for each member, we need to fetch their user_guid by their email and validate they exist in the same company as the project, then add them as a member to the project
+    const newMembers: MemberType[] = [];
+    for (const member of members) {
+      const userResult = await client.query(
+        "SELECT guid, name, email FROM users WHERE email = $1 AND company_guid = $2 AND deleted_at IS NULL LIMIT 1",
+        [member.email, company_guid],
+      );
+      if (userResult.rows.length === 0) {
+        throw new Error(
+          `User with email ${member.email} does not exist in the same company as the project`,
+        );
+      }
+      console.log("userResult: ", userResult.rows[0]);
+      const user = userResult.rows[0];
+      await createMemberToProject(guid, user.guid, "member", client);
+      newMembers.push({
+        user_guid: user.guid,
+        name: user.name,
+        email: user.email,
+        role: "member",
+        joined_at: new Date(),
+      });
+    }
+    await client.query("COMMIT");
+    return newMembers;
+  } catch (error) {
+    console.error("Error adding members to project: ", error);
+    await client.query("ROLLBACK");
+    throw new Error("Failed to add members to project");
   } finally {
     client.release();
   }

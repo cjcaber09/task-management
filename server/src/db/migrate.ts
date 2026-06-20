@@ -62,6 +62,13 @@ const migrate = async () => {
       schema: taskCommentSchema,
     },
   ];
+
+  const migrations = [
+    {
+      name: "001_add_assign_to_task",
+      schema: (await import("./migrations/001_add_assign_to_task")).default,
+    },
+  ];
   //   Query enum type to check if it exists before creating it
   const checkEnumType = async (typeName: string) => {
     const result = await pool.query(
@@ -103,6 +110,12 @@ const migrate = async () => {
   try {
     for (const { name, schema } of schemas) {
       await pool.query(schema);
+      console.log(`Schema ${name} created successfully`);
+    }
+    // run the migrations in the migrations folder in order
+    for (const { name, schema } of migrations) {
+      await pool.query(schema);
+      console.log(`Migration ${name} ran successfully`);
     }
   } catch (error) {
     console.error("Migration failed: ", error);

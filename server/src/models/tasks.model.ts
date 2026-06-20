@@ -112,3 +112,28 @@ export const getTaskByGuid = async (
     throw new Error("Failed to fetch task");
   }
 };
+
+export const updateTaskInfo = async (
+  { guid }: Pick<taskType, "guid">,
+  { updateData }: { updateData: Partial<Omit<taskType, "guid">> },
+): Promise<TaskResponse> => {
+  try {
+    const fields = Object.keys(updateData);
+    const values = Object.values(updateData);
+    const setClause = fields
+      .map((field, index) => `${field} = $${index + 1}`)
+      .join(", ");
+    const result = await pool.query(
+      `UPDATE tasks SET ${setClause}, updated_at = NOW() WHERE guid = $${fields.length + 1} AND deleted_at IS NULL`,
+      [...values, guid],
+    );
+    if (result.rowCount === 0) {
+      throw new Error("Task not found or no changes made");
+    }
+    const updatedTask = await getTaskByGuid(guid);
+    return updatedTask;
+  } catch (error) {
+    console.error("Error updating task: ", error);
+    throw new Error("Failed to update task");
+  }
+};

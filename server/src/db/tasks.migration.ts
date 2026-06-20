@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS tasks (
 );
   CREATE INDEX IF NOT EXISTS idx_tasks_project_guid ON tasks (project_guid);
   CREATE INDEX IF NOT EXISTS idx_tasks_name ON tasks (name);
-  CREATE INDEX IF NOT EXISTS idx_project_guid ON tasks (project_guid);
+  CREATE INDEX IF NOT EXISTS idx_tasks_guid ON tasks (guid);
   ${tableTrigger("tasks", "updated_at")}
 `;
 

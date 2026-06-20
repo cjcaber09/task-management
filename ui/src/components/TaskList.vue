@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import TaskContainer from './TaskContainer.vue'
 import Modal from './ui/Modal.vue'
 import { useProgressTypeStore } from '../stores/statusType.ts'
@@ -8,7 +9,6 @@ import { useTaskStore } from '../stores/taskStore.ts'
 import { useProjectStore } from '../stores/projectStore.ts'
 import router from '@/router'
 import TaskDetails from './TaskDetails.vue'
-import { Trash } from '@lucide/vue'
 // need to filter tasks based on selected status in ProgressStatus component
 const statusStore = useProgressTypeStore()
 const tasksStore = useTaskStore()
@@ -17,8 +17,7 @@ defineOptions({
   name: 'TaskList',
 })
 const showModal = ref(false)
-
-const activeTask = ref<TaskType | null>(null)
+const { getActiveTask: activeTask } = storeToRefs(tasksStore)
 const filteredTasks = computed((): TaskType[] => {
   // if no active project, return all tasks, otherwise return tasks for the active project
   if (!projectStore.activeProject) {
@@ -31,7 +30,7 @@ const filteredTasks = computed((): TaskType[] => {
 })
 
 const setActiveTask = (task: TaskType) => {
-  activeTask.value = task
+  tasksStore.setActiveTask(task)
   showModal.value = true
 }
 onMounted(() => {
@@ -65,17 +64,14 @@ onMounted(() => {
       @close="showModal = false"
       :width="60"
       :height="50"
+      noCloseButton
     >
       <template #content>
         <div v-if="activeTask" class="h-full min-h-0 overflow-hidden">
-          <TaskDetails :task="activeTask" />
+          <TaskDetails />
         </div>
       </template>
-      <template #footer>
-        <button class="btn-outline btn-danger flex items-center">
-          <Trash class="w-4 h-4 mr-2" /> Delete Task
-        </button>
-      </template>
+      <template #footer> </template>
     </Modal>
   </div>
 </template>
