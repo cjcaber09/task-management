@@ -23,6 +23,10 @@ const emptyActiveProject = () => {
 const projects = computed(() => {
   return projectStore.projects
 })
+
+const companyName = computed(() => {
+  return companyStore.company ? companyStore.company.name : ''
+})
 </script>
 
 <template>
@@ -30,9 +34,7 @@ const projects = computed(() => {
     <div class="logo flex gap-2 px-4 pb-6 flex-col">
       <h2 class="sidebar-title">Task Manager</h2>
       <!-- Company Name -->
-      <span class="sidebar-company-name text-md text-gray-500">{{
-        companyStore.company.name
-      }}</span>
+      <span class="sidebar-company-name text-md text-gray-500">{{ companyName }}</span>
     </div>
     <nav class="sidebar-nav flex flex-col mt-6 px-4">
       <router-link to="/dashboard" class="sidebar-link" @click="emptyActiveProject"

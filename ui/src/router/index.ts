@@ -20,6 +20,11 @@ const router = createRouter({
       props: true,
     },
     {
+      name: 'Profile',
+      path: '/profile',
+      component: () => import('@/views/Dashboard.vue'),
+    },
+    {
       name: 'Register',
       path: '/register',
       component: () => import('@/views/Register.vue'),

@@ -25,7 +25,7 @@ const handleOutsideClick = (event: MouseEvent) => {
     emit('close')
   }
 }
-
+// ALWAYS STOP PROPAGATION OF CLICK EVENTS ON THE DROPDOWN MENU TO PREVENT UNINTENDED CLOSURES
 const handleItemClick = (action: () => void) => {
   action()
   emit('close')
