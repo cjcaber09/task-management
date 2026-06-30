@@ -68,6 +68,10 @@ const migrate = async () => {
       name: "001_add_assign_to_task",
       schema: (await import("./migrations/001_add_assign_to_task")).default,
     },
+    {
+      name: "002_address_and_name",
+      schema: (await import("./migrations/002_address_and_name")).default,
+    },
   ];
   //   Query enum type to check if it exists before creating it
   const checkEnumType = async (typeName: string) => {

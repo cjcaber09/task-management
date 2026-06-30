@@ -10,13 +10,23 @@ import { Route } from "../types/general.types";
 
 const buildRoutes = (router: express.Router, routes: Route[]) => {
   routes.forEach((route) => {
+    const handlers: express.RequestHandler[] = [];
+
     if (route.authentication && route.authHandler) {
-      router[route.method](route.path, route.authHandler, route.handler);
-    } else if (route.validation && route.validationHandler) {
-      router[route.method](route.path, route.validationHandler, route.handler);
-    } else {
-      router[route.method](route.path, route.handler);
+      handlers.push(route.authHandler);
     }
+
+    if (route.validation && route.validationHandler) {
+      handlers.push(route.validationHandler);
+    }
+
+    if (route.middleware && route.middleware.length > 0) {
+      handlers.push(...route.middleware);
+    }
+
+    handlers.push(route.handler);
+
+    router[route.method](route.path, ...handlers);
   });
 };
 

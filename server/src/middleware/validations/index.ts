@@ -4,6 +4,7 @@ import {
   loginUserSchema,
 } from "../../../../shared/schema/userSchema";
 import { membersSchema } from "./schema/MembersSchema";
+import { updatePasswordSchema } from "./schema/UsersSchema";
 
 const validationHandler = (schema: any) => {
   return async (
@@ -29,9 +30,10 @@ const validationHandler = (schema: any) => {
 export const validateCreateUser = validationHandler(createUserSchema);
 export const validateLoginUser = validationHandler(loginUserSchema);
 export const validateAddMembers = validationHandler(membersSchema);
-
+export const validateUpdatePassword = validationHandler(updatePasswordSchema);
 export default {
   validateCreateUser,
   validateLoginUser,
   validateAddMembers,
+  validateUpdatePassword,
 };

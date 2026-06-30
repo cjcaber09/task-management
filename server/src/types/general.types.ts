@@ -8,4 +8,5 @@ export interface Route {
   validation?: boolean;
   validationHandler?: express.RequestHandler<any, any, any, any>;
   handler: express.RequestHandler<any, any, any, any>;
+  middleware?: express.RequestHandler<any, any, any, any>[];
 }

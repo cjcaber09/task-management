@@ -191,20 +191,123 @@ export const searchUsersByEmail = async ({
   company_guid,
   exact = false,
 }: Pick<UserType, "email" | "company_guid"> & { exact?: boolean }): Promise<
-  Omit<UserType, "password">[]
+  Omit<UserType, "password">
 > => {
   // email is already normalized in the controller, so we can directly use it here
   try {
     const query = exact
-      ? "SELECT guid, email, name, company_guid, created_at, updated_at, deleted_at FROM users WHERE lower(email) = $1 AND company_guid=$2 AND deleted_at IS NULL"
-      : "SELECT guid, email, name, company_guid, created_at, updated_at, deleted_at FROM users WHERE email ILIKE $1 AND company_guid=$2 AND deleted_at IS NULL";
+      ? "SELECT * FROM users WHERE lower(email) = $1 AND company_guid=$2 AND deleted_at IS NULL"
+      : "SELECT * FROM users WHERE email ILIKE $1 AND company_guid=$2 AND deleted_at IS NULL";
     const result = await pool.query(query, [
       exact ? email : `%${email}%`,
       company_guid,
     ]);
-    return result.rows;
+    // remove the password from the user object before returning it
+    const user = result.rows[0];
+    const { password: _, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   } catch (error) {
     console.error("Error searching users: ", error);
     throw new Error("Failed to search users");
+  }
+};
+
+export const updateUserPassword = async (
+  guid: string,
+  oldPassword: string,
+  newPassword: string,
+): Promise<Omit<UserType, "password"> | null> => {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    // Fetch the user by guid
+    const userResult = await client.query(
+      "SELECT * FROM users WHERE guid = $1",
+      [guid],
+    );
+    if (userResult.rows.length === 0) {
+      throw new Error("User not found");
+    }
+    const user = userResult.rows[0];
+
+    // Verify the old password
+    const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isPasswordValid) {
+      throw new Error("Old password is incorrect");
+    }
+    console.log("Old password is valid, proceeding to update the password");
+    // Hash the new password
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the user's password in the database
+    const updateResult = await client.query(
+      "UPDATE users SET password = $1 WHERE guid = $2",
+      [hashedNewPassword, guid],
+    );
+    await client.query("COMMIT");
+    if (updateResult.rowCount === 0) {
+      throw new Error("Failed to update password");
+    } else {
+      const { password: _, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    }
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw new Error(
+      "Error updating password: " +
+        (error instanceof Error ? error.message : String(error)),
+    );
+  } finally {
+    client.release();
+  }
+};
+
+export const updateDBUserData = async (
+  guid: string,
+  userDetails: Partial<UserType>,
+): Promise<Omit<UserType, "password"> | null> => {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    // Build the update query dynamically based on the provided userDetails
+    const setClauses = [];
+    const values = [];
+    let index = 1;
+
+    for (const [key, value] of Object.entries(userDetails)) {
+      if (value !== undefined && value !== null) {
+        setClauses.push(`${key} = $${index}`);
+        values.push(value);
+        index++;
+      }
+    }
+
+    if (setClauses.length === 0) {
+      throw new Error("No valid user details provided for update");
+    }
+    console.log("Update query set clauses: ", setClauses);
+
+    const updateQuery = `UPDATE users SET ${setClauses.join(
+      ", ",
+    )} WHERE guid = $${index} RETURNING *`;
+    values.push(guid);
+
+    const updateResult = await client.query(updateQuery, values);
+    await client.query("COMMIT");
+
+    if (updateResult.rows.length === 0) {
+      throw new Error("User not found or no changes made");
+    } else {
+      const { password: _, ...userWithoutPassword } = updateResult.rows[0];
+      return userWithoutPassword;
+    }
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw new Error(
+      "Error updating user data: " +
+        (error instanceof Error ? error.message : String(error)),
+    );
+  } finally {
+    client.release();
   }
 };
