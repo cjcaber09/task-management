@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import ContentHeader from '../components/ContentHeader.vue'
 import ContentMain from '../components/ContentMain.vue'
-import Profile from './Profile.vue'
+import Profile from '../views/Profile.vue'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 defineOptions({

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import AddAssignee from './ui/AddAssignee.vue'
-import { normalizeText, lowerCaseText, isValidEmail } from '@/utils/StringUtils.ts'
+import { normalizeText, lowerCaseText, isValidEmail } from '@/utils/stringUtils.ts'
 import { ref } from 'vue'
 import { useProjectStore } from '@/stores/projectStore'
 import useNotificationStore from '@/stores/notificationStore'

@@ -23,9 +23,27 @@ export interface UserType {
   guid: string
   email: string
   name: string
-  profileImage?: string
+  profile_image_url?: string
+  attachment_info?: {
+    profile_image_name: string
+    profile_image_mimetype: string
+    profile_image_size: number
+    uploaded_at: Date
+  } | null
+  first_name: string
+  last_name: string
   password: string
   company_guid: string
+  address?: {
+    city: string
+    state: string
+    zipCode: string
+    street: string
+  }
+  contact_info?: {
+    phone: string
+    email: string
+  }
   created_at: Date
   updated_at: Date
   deleted_at: Date | null

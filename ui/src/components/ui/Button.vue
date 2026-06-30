@@ -2,12 +2,11 @@
   <div class="flex">
     <button
       :class="`btn mt-2 ${btnUI} ${classes}`"
-      type="submit"
+      :type="type"
       @click="$emit('click')"
-      form="create-project-form"
       :disabled="isLoading ? true : false"
     >
-      <iconComponent
+      <component
         v-if="iconComponent"
         :is="iconComponent"
         class="w-4 inline-block h-4 mr-1 mb-1 items-center justify-center"
@@ -40,6 +39,10 @@ defineProps({
   iconComponent: {
     type: Function,
     default: null,
+  },
+  type: {
+    type: String as () => 'button' | 'submit' | 'reset',
+    default: 'button',
   },
 })
 </script>

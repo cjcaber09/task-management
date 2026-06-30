@@ -10,7 +10,10 @@ defineOptions({
 
 const props = defineProps({
   user: {
-    type: Object as PropType<Pick<UserType, 'guid' | 'email' | 'name' | 'profileImage'> | null>,
+    type: Object as PropType<Pick<
+      UserType,
+      'guid' | 'email' | 'name' | 'profile_image_url'
+    > | null>,
     default: null,
   },
   width: {
@@ -26,7 +29,7 @@ const props = defineProps({
 const widthValue = computed(() => props.width)
 const heightValue = computed(() => props.height)
 
-const hasProfile = computed(() => !!props.user?.profileImage)
+const hasProfile = computed(() => !!props.user?.profile_image_url)
 const avatarStyle = computed(() => ({
   width: `${widthValue.value * 0.25}rem`,
   height: `${heightValue.value * 0.25}rem`,
@@ -48,10 +51,10 @@ const openDropdown = () => {
 <template>
   <div v-if="hasProfile && props.user" class="flex relative" @click.stop="openDropdown">
     <img
-      :src="props.user.profileImage || ''"
+      :src="props.user.profile_image_url || ''"
       alt="Profile"
       :style="avatarStyle"
-      class="rounded-full border-2 border-gray-300"
+      class="rounded-full border-2 border-gray-300 profile-avatar"
     />
   </div>
   <div v-else class="flex relative" @click.stop="openDropdown">
@@ -66,4 +69,11 @@ const openDropdown = () => {
   />
 </template>
 
-<style scoped></style>
+<style scoped>
+.profile-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+</style>

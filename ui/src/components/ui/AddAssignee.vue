@@ -31,6 +31,7 @@ const editMode = ref(false)
       :modelValue="modelValue"
       @update:modelValue="(emit('update:modelValue', $event), emit('input-change', $event))"
       @input-enter="emit('add')"
+      :preventEnter="false"
       v-if="!singleAssigned || (singleAssigned && editMode === true)"
     />
     <div class="flex flex-row flex-wrap gap-2" v-if="assignees && assignees.length > 0">
